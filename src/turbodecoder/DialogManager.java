@@ -15,9 +15,6 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import javax.swing.JDialog;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -63,15 +60,7 @@ public class DialogManager {
     private DialogManager() {
         /*Look and feel*/
         uiPersistenceMap = new HashMap<>();
-
-        /*Get all Look and Feels*/
-        LookAndFeelInfo[] lafInfos = UIManager.getInstalledLookAndFeels();
-        String plafClasses[] = new String[lafInfos.length];
-
-        for (int i = 0; i < lafInfos.length; i++) {
-            plafClasses[i] = lafInfos[i].getClassName();
-        }
-
+        tryWindowsLookAndFeel();
     }
 
 
@@ -218,6 +207,53 @@ public class DialogManager {
 
     private void closeTransientFrames() {
         setDecoderTransientFrameVisible(false);
+    }
+    
+    private void tryWindowsLookAndFeel() {
+
+        /*Check if running on Windows. If not, just return*/
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+            return;
+        }
+
+        /*Get all look and feel classes*/
+        LookAndFeelInfo[] lafInfos = UIManager.getInstalledLookAndFeels();
+        String plafClasses[] = new String[lafInfos.length];
+
+        for (int i = 0; i < lafInfos.length; i++) {
+            plafClasses[i] = lafInfos[i].getClassName();
+        }
+
+        /*Check if there is a look and feel for windows*/
+        String windowsLaF = null;
+
+        for (String plafClassName : plafClasses) {
+            String lc = plafClassName.toLowerCase();
+
+            /*Windows and not classic*/
+            if (lc.contains("windows") && !lc.contains("classic")) {
+                windowsLaF = plafClassName;
+                break;
+            }
+            /*Just windows*/
+            if (lc.contains("windows")) {
+                windowsLaF = plafClassName;
+                break;
+            }
+        }
+
+        /*No Look and Feel found, just return*/
+        if (windowsLaF == null) {
+            return;
+        }
+
+        /*Set Look and Feel found for Windows*/
+        try {
+            UIManager.setLookAndFeel(windowsLaF);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
+            e1.printStackTrace();
+        }
+
     }
 
 }

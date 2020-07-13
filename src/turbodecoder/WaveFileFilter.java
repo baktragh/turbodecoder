@@ -10,7 +10,7 @@ public class WaveFileFilter extends javax.swing.filechooser.FileFilter {
             if (!file.isFile()) return true;
             
             String p = file.getName().toLowerCase();
-            if (p.endsWith(".xex") || p.endsWith(".com") ||  p.endsWith(".obj")) {
+            if (p.endsWith(".wav")) {
                 return true;
             }
             return false;
@@ -18,7 +18,7 @@ public class WaveFileFilter extends javax.swing.filechooser.FileFilter {
 
         @Override
         public String getDescription() {
-            return "Atari binary files (.xex,.com,.obj)";
+            return "WAVE files (.wav)";
         }
         
     }

@@ -18,6 +18,7 @@ import turbodecoder.ParallelGUIUpdater;
 import turbodecoder.TurboDecoder;
 import turbodecoder.UIPersistor;
 import turbodecoder.Utils;
+import turbodecoder.WaveFileFilter;
 
 /**
  *
@@ -157,6 +158,14 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         pTurboROMSettings = new javax.swing.JPanel();
         jlbTurboROMFormat = new javax.swing.JLabel();
         jcoTurboROMFormat = new javax.swing.JComboBox<>();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jmFile = new javax.swing.JMenu();
+        jmiExit = new javax.swing.JMenuItem();
+        jmHelp = new javax.swing.JMenu();
+        jmiAbout = new javax.swing.JMenuItem();
+
+        fcDecodeInput.setFileFilter(new WaveFileFilter()
+        );
 
         fcDecodeOutput.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
         fcDecodeOutput.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
@@ -729,6 +738,35 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
 
         getContentPane().add(pDecoding, java.awt.BorderLayout.CENTER);
 
+        jmFile.setMnemonic('F');
+        jmFile.setText("File");
+
+        jmiExit.setMnemonic('x');
+        jmiExit.setText("Exit");
+        jmiExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiExitActionPerformed(evt);
+            }
+        });
+        jmFile.add(jmiExit);
+
+        jMenuBar1.add(jmFile);
+
+        jmHelp.setMnemonic('H');
+        jmHelp.setText("Help");
+
+        jmiAbout.setText("About...");
+        jmiAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmiAboutActionPerformed(evt);
+            }
+        });
+        jmHelp.add(jmiAbout);
+
+        jMenuBar1.add(jmHelp);
+
+        setJMenuBar(jMenuBar1);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -914,6 +952,15 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
 
     }//GEN-LAST:event_onFontChange
 
+    private void jmiAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiAboutActionPerformed
+       String s = TurboDecoder.getInstance().getProgramInfoString();
+       JOptionPane.showMessageDialog(this, s, "About", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jmiAboutActionPerformed
+
+    private void jmiExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmiExitActionPerformed
+        on_close(null);
+    }//GEN-LAST:event_jmiExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -936,6 +983,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.Box.Filler filler4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -979,6 +1027,10 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.JLabel jlbTurboROMFormat;
     private javax.swing.JLabel jlbWave;
     private javax.swing.JList<DecoderMessage> jlsMessages;
+    private javax.swing.JMenu jmFile;
+    private javax.swing.JMenu jmHelp;
+    private javax.swing.JMenuItem jmiAbout;
+    private javax.swing.JMenuItem jmiExit;
     private javax.swing.JSlider jslNavigation;
     private javax.swing.JScrollPane jspGeneralSettings;
     private javax.swing.JScrollPane jspOtherSettings;

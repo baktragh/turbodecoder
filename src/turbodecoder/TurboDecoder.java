@@ -2,31 +2,11 @@ package turbodecoder;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Date;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 /*
- TURGEN SYSTEM, conversion of files to turbo systems and standard tape records
- Copyright (C) 2006-2020 Michael Kalouš
-
- This program is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+ * Turbo Decoder, program for decoding atari turbo cassette tapes.
  */
 
 public class TurboDecoder {
@@ -34,33 +14,18 @@ public class TurboDecoder {
     /**
      * Version string
      */
-    private final String TURBODECODER_VERSION_STRING = "Turbo Decoder 0.0.1";
+    private final String TURBODECODER_VERSION_STRING = "Turbo Decoder 1.0.0";
 
-    /**
-     * Directory with TurboDecoder.jar file
-     */
-    private String dirPrefix;
-
-    /**
-     * Directory with configuration
-     */
     private String configDir;
-
-    /**
-     * Owner of all dialogs and frames, takes care about storing/restoring
-     * bounds etc.
-     */
     private DialogManager dlm;
-
-   
+ 
     /*Some global strings*/
-
     public static final String LN = System.getProperty("line.separator");
     public static final String SP = System.getProperty("file.separator");
     public static final String OS_NAME = System.getProperty("os.name");
     private String programInfoString = null;
 
-    
+    /*Let us be a single child*/
     private static TurboDecoder singletonInstance=null;
     
     public static TurboDecoder getInstance() {
@@ -86,15 +51,11 @@ public class TurboDecoder {
             /*Retrieve or create config directory*/
             decoder.retrieveConfigDir();
 
-            /*Redirect stdout and stderr*/
+            /*Redirect stdout and stderr unless a property is set*/
             if (System.getProperty("turbodecoder.noRedirect")==null) {
                 decoder.redirect();
             }
            
-
-            /*Where is TurboDecoder.jar*/
-            decoder.retrieveDirPrefix();
-            
             /*Create GUI*/
             decoder.createDialogs();
             
@@ -177,49 +138,7 @@ public class TurboDecoder {
         }
     }
 
-   
-    /**
-     * Locate program directory 1. Try an equivalent of argv[0] 2. Try current
-     * directory 3. Fail
-     */
-    void retrieveDirPrefix() throws Exception {
-        File jarFile;
-
-        /*From JAR file*/
-        try {
-            URL u = TurboDecoder.class.getProtectionDomain().getCodeSource().getLocation();
-            URI i = new URI(u.toString());
-            String s = i.getPath();
-
-            jarFile = new File(s);
-            dirPrefix = jarFile.getParentFile().getAbsolutePath().concat(System.getProperty("file.separator"));
-
-            File f = new File(dirPrefix + "turbodecoder.jar");
-            if (f.exists() && f.isFile()) {
-                return;
-            }
-        } catch (URISyntaxException e) {
-            /*Intentionally blank*/
-        }
-
-        /*From user's working directory*/
-        dirPrefix = System.getProperty("user.dir") + System.getProperty("file.separator");
-        final File f1 = new File(dirPrefix + "turbodecoder.jar");
-
-        /*If decoder.jar does not exist, then*/
-        if (!(f1.exists())) {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    JOptionPane.showMessageDialog(null, "Unable to locate program directory");
-                }
-            });
-            System.exit(-1);
-        }
-
-    }
-
-    /**
+   /**
      * Retrieve or create configuration directory
      */
     void retrieveConfigDir() {
@@ -250,11 +169,9 @@ public class TurboDecoder {
 
         StringBuilder retVal = new StringBuilder(64);
         retVal.append("<HTML>" + TURBODECODER_VERSION_STRING + "<BR><BR>");
-        retVal.append("Turbo Decoder<BR>");
+        retVal.append("Turbo Decoder, program for decoding Atari turbo cassette tapes.<BR>");
         retVal.append("Operating system: ");
         retVal.append(OS_NAME).append("<BR>");
-        retVal.append("Program directory: ");
-        retVal.append(dirPrefix.substring(0, dirPrefix.length() - 1)).append("<BR>");
         retVal.append("Directory with configuration: ");
         retVal.append(configDir.substring(0, configDir.length() - 1)).append("<BR>");
         retVal.append("File separator: ");
@@ -273,11 +190,7 @@ public class TurboDecoder {
         return programInfoString;
 
     }
-
-    public String getDirPrefix() {
-        return dirPrefix;
-    }
-    
+ 
     public String getVersionString() {
         return TURBODECODER_VERSION_STRING;
     }
