@@ -1,0 +1,433 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\date{}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "beraserif" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_title "TURGEN SYSTEM"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered true
+\pdf_bookmarksopen true
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle false
+\pdf_quoted_options "unicode=true"
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict true
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Turbo Decoder
+\end_layout
+
+\begin_layout Section
+Installation and Startup
+\end_layout
+
+\begin_layout Subsection
+Installation
+\end_layout
+
+\begin_layout Enumerate
+Download and install Java Runtime Environment (JRE) or Java Development
+ Kit (JDK), version 8 or newer.
+\end_layout
+
+\begin_layout Enumerate
+Clone the project repository or download a release package and extract it
+ to a program directory <PROGDIR>.
+\end_layout
+
+\begin_layout Subsection
+Startup
+\end_layout
+
+\begin_layout Standard
+Execute the following command: 
+\family typewriter
+java -jar <PROGDIR>dist/turbodecoder.jar
+\family default
+, or double click the turbodecoder.exe launcher.
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+The Turbo Decoder is a tool designed to retrieve data from tapes.
+ The decoding algorithm is a simple Java rewrite of turbo loaders from assembler
+ 6502.
+\end_layout
+
+\begin_layout Standard
+The electric signal can be read from WAVE files.
+ When creating WAVE files, it is recommended to set the tape recorder to
+ get maximum signal amplitude.
+ The WAVE file must be in the following format: PCM, 1 or 2 channels, 44100
+\begin_inset space \thinspace{}
+\end_inset
+
+-
+\begin_inset space \thinspace{}
+\end_inset
+
+96000
+\begin_inset space ~
+\end_inset
+
+Hz, 8
+\begin_inset space ~
+\end_inset
+
+or 16
+\begin_inset space ~
+\end_inset
+
+bits per sample.
+\end_layout
+
+\begin_layout Standard
+Another possibility is to read the electric signal directly from the sound
+ card.
+ This source of electric signal is supported, but not recommended.
+\end_layout
+
+\begin_layout Standard
+Turbo systems supported by the decoder are the following: Turbo 2000, Turbo
+ 2000 - kilobyte blocks, Super Turbo, Turbo Tape and B-TAPE, KSO Turbo 2000,
+ Turbo Blizzard, Turbo ROM, Atari Super Turbo (AST format only), Hard Turbo,
+ and Lower Silesian Turbo 2000.
+\end_layout
+
+\begin_layout Standard
+The decoder can also decode raw blocks instead of files.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename images/decoder.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Turbo decoder
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Preparing WAVE files
+\end_layout
+
+\begin_layout Standard
+To prepare the wave file, you can use Audacity - free, open source, cross-platfo
+rm software for recording and editing sounds.
+\end_layout
+
+\begin_layout Standard
+Before decoding, applying of the following two filters is recommended: 
+\end_layout
+
+\begin_layout Enumerate
+High pass filter.
+ Cutoff frequency 1000 Hz, rolloff 48 dB.
+ This helps to remove DC offset.
+\end_layout
+
+\begin_layout Enumerate
+Low pass filter.
+ Cutoff frequency 12000 Hz, rolloff 48 dB.
+ This removes small fluctuations of the signal.
+\end_layout
+
+\begin_layout Standard
+Alternatively, you can use the Bass & Treble filter set to minimum bass
+ and maximum treble.
+\end_layout
+
+\begin_layout Standard
+To use a wave file with the A8CAS-enhanced atari800 emulator, amplify the
+ signal with maximum amplification and allow clipping.
+\end_layout
+
+\begin_layout Standard
+When using a software for editing sounds, 
+\emph on
+ensure that the resulting wave file is saved without any metadata
+\emph default
+ (Artist name, track name...).
+\end_layout
+
+\begin_layout Subsection
+Preparing the Decoder
+\end_layout
+
+\begin_layout Standard
+Select a source of the electric signal using the 
+\emph on
+Signal source
+\emph default
+ combo box.
+ 
+\end_layout
+
+\begin_layout Standard
+If the source of the electric signal is a WAVE file, fill-in the WAVE file
+ name and select input channel using the 
+\emph on
+Channel
+\emph default
+ combo box.
+\end_layout
+
+\begin_layout Standard
+If the source of the electric signal is the sound card, select input channel
+ using the 
+\emph on
+Channel
+\emph default
+ combo box, select the sampling rate using the 
+\emph on
+Rate
+\emph default
+ combo box, and select number of bits per sample using the 
+\emph on
+Bits
+\emph default
+ combo box.
+\end_layout
+
+\begin_layout Standard
+Enter the output directory and click the 
+\emph on
+Attach Decoder 
+\emph default
+button.
+ The decoder is now ready to decode the electric signal.
+\end_layout
+
+\begin_layout Subsection
+Decoding Files
+\end_layout
+
+\begin_layout Standard
+Use the 
+\emph on
+Navigation
+\emph default
+ panel to specify current position in the WAVE file.
+\end_layout
+
+\begin_layout Standard
+The controls on the 
+\emph on
+Decoding
+\emph default
+ panel are devoted to perform decoding.
+ Use the combo box 
+\emph on
+Decoder
+\emph default
+ to select a turbo system.
+\end_layout
+
+\begin_layout Standard
+To start decoding of one file or all files until the end of the WAVE file,
+ click 
+\emph on
+Decode one file
+\emph default
+ or 
+\emph on
+Decode until EOF
+\emph default
+ buttons.
+ To stop the decoding process, press the 
+\emph on
+Stop
+\emph default
+ button.
+\end_layout
+
+\begin_layout Standard
+You can see the results of decoding in the 
+\emph on
+Log
+\emph default
+ tab.
+ If you use a digitized sound editor, you can use the sample numbers enclosed
+ in the curly braces.
+\end_layout
+
+\begin_layout Standard
+If you want to work with different WAVE file, or to select another source
+ of the electric signal, detach the turbo decoder using the 
+\emph on
+Detach decoder
+\emph default
+ button.
+\end_layout
+
+\begin_layout Standard
+If the decoder stops responding due to a bad sound card setup, press the
+ 
+\emph on
+Stop
+\emph default
+ button while pressing the SHIFT key.
+ This is called emergency stop.
+ After an emergency stop, the decoder must be detached and attached to be
+ ready again.
+\end_layout
+
+\begin_layout Subsection
+Decode Raw Blocks
+\end_layout
+
+\begin_layout Standard
+To decode raw blocks, select the 
+\emph on
+Decode raw blocks 
+\emph default
+check box.
+ Turbo decoder reads raw blocks of the selected turbo system.
+ If a block is found, it is decoded until an error occurs or end of block
+ is encountered.
+ No checksums are verified and internal format of the block is not validated.
+\end_layout
+
+\begin_layout Standard
+To decode a single block, click the 
+\emph on
+Decode one file
+\emph default
+ button.
+ To decode all blocks until end of file, click the 
+\emph on
+Decode until EOF
+\emph default
+ button.
+\end_layout
+
+\begin_layout Standard
+This option is available for special purposes such as decoding data stored
+ in non-standard formats, recovering corrupted files etc.
+\end_layout
+
+\begin_layout Subsection
+Configuring the Decoder
+\end_layout
+
+\begin_layout Standard
+Use controls on the General settings and Other settings tabs to configure
+ the decoder.
+\end_layout
+
+\end_body
+\end_document
