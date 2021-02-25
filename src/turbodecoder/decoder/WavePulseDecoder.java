@@ -30,6 +30,11 @@ public class WavePulseDecoder implements PulseDecoder {
     private int sampleRate;
     private long totalSamples;
     private boolean pastEOF;
+    
+    private int xm1;
+    private int ym1;
+    private static final double TIME_CONSTANT=0.995;
+    private boolean useDCBlocker;
 
     /**
      *
@@ -42,6 +47,7 @@ public class WavePulseDecoder implements PulseDecoder {
         stopRequest = false;
         currentByte = new byte[4];
         pastEOF = false;
+        useDCBlocker=true;
     }
 
     @Override
@@ -68,6 +74,9 @@ public class WavePulseDecoder implements PulseDecoder {
         buffer = new byte[BUF_SIZE];
         bufAvail = 0;
         bufPointer = 0;
+        
+        xm1=0;
+        ym1=0;
 
     }
 
@@ -266,7 +275,7 @@ public class WavePulseDecoder implements PulseDecoder {
             return PD_EOF;
         }
 
-        int k;
+        int frame;
 
         try {
 
@@ -296,19 +305,25 @@ public class WavePulseDecoder implements PulseDecoder {
 
         sample++;
         if (bytesPerSample == 1) {
-            k = (currentByte[byteIndex] < 0 ? currentByte[byteIndex] + 256 : currentByte[byteIndex]);
-            if (k >= 128) {
-                return 1;
-            }
-            if (k >= 0) {
-                return 0;
-            }
+            frame = (currentByte[byteIndex] < 0 ? currentByte[byteIndex] + 256 : currentByte[byteIndex]);
         } else {
-            int frame = (currentByte[byteIndex] & 0xFF) | ((currentByte[byteIndex + 1]) << 8);
-            return (frame < 0) ? 0 : 1;
+            frame = (currentByte[byteIndex] & 0xFF) | ((currentByte[byteIndex + 1]) << 8);
+        }
+        
+        if (useDCBlocker==true) {
+            int tempFrame=frame-xm1 + (int)Math.round(TIME_CONSTANT * ym1);
+            xm1=frame;
+            ym1=tempFrame;
+            frame=tempFrame;
+        }
+        
+        if (bytesPerSample==1) {
+            if (frame>=128) return 1; else return 0;
+        }
+        else {
+            return (frame<0)?0:1;
         }
 
-        return PD_EOF;
     }
 
     private void examineFormat() throws Exception {
