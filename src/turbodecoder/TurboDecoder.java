@@ -14,7 +14,7 @@ public class TurboDecoder {
     /**
      * Version string
      */
-    private final String TURBODECODER_VERSION_STRING = "Turbo Decoder 1.0.0";
+    private final String TURBODECODER_VERSION_STRING = "Turbo Decoder 1.0.1";
 
     private String configDir;
     private DialogManager dlm;
@@ -169,7 +169,7 @@ public class TurboDecoder {
 
         StringBuilder retVal = new StringBuilder(64);
         retVal.append("<HTML>" + TURBODECODER_VERSION_STRING + "<BR><BR>");
-        retVal.append("Turbo Decoder, program for decoding Atari turbo cassette tapes.<BR>");
+        retVal.append("Turbo Decoder, tool for decoding files from 8-bit Atari turbo cassette tapes.<BR>");
         retVal.append("Operating system: ");
         retVal.append(OS_NAME).append("<BR>");
         retVal.append("Directory with configuration: ");

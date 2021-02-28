@@ -5,7 +5,7 @@ import turbodecoder.FileFormatException;
 
 /**
  *
- * @author  
+ * @author
  */
 public class WavePulseDecoder implements PulseDecoder {
 
@@ -30,10 +30,10 @@ public class WavePulseDecoder implements PulseDecoder {
     private int sampleRate;
     private long totalSamples;
     private boolean pastEOF;
-    
+
     private int xm1;
     private int ym1;
-    private static final double TIME_CONSTANT=0.995;
+    private static final double TIME_CONSTANT = 0.995;
     private boolean useDCBlocker;
 
     /**
@@ -47,11 +47,11 @@ public class WavePulseDecoder implements PulseDecoder {
         stopRequest = false;
         currentByte = new byte[4];
         pastEOF = false;
-        useDCBlocker=true;
+        useDCBlocker = false;
     }
 
     @Override
-    public void init(String fspec, DecoderLog log, Object config2, Object config3) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean dcBlocker, DecoderLog log) throws Exception {
 
         /*Open and examine file*/
         waveFile = new RandomAccessFile(fspec, "r");
@@ -63,20 +63,25 @@ public class WavePulseDecoder implements PulseDecoder {
         /*Index in frame*/
         if (numChannels == 1) {
             byteIndex = 0;
-        } else /*Second channel?*/ if (config2.equals("Right")) {
+        } else /*Second channel?*/ if (channel == PulseDecoder.CHANNEL_RIGHT) {
             byteIndex = bytesPerSample;
         } else {
             byteIndex = 0;
         }
 
         rewind();
-        log.addMessage(new DecoderMessage("WavePulseDecoder", fspec + " " + Integer.toString(frameSize) + "/" + Integer.toString(byteIndex) + ":" + Integer.toString(sampleRate), DecoderMessage.SEV_DETAIL), false);
+        log.addMessage(new DecoderMessage("WavePulseDecoder",
+                String.format("%s FrameSize: %02d, ByteIndex: %d, SamplingRate: %d",
+                        fspec, frameSize, byteIndex, sampleRate),
+                DecoderMessage.SEV_DETAIL), false);
+        
         buffer = new byte[BUF_SIZE];
         bufAvail = 0;
         bufPointer = 0;
-        
-        xm1=0;
-        ym1=0;
+
+        xm1 = 0;
+        ym1 = 0;
+        useDCBlocker = dcBlocker;
 
     }
 
@@ -122,7 +127,7 @@ public class WavePulseDecoder implements PulseDecoder {
 
         while (true) {
             k = getNextSample();
-            
+
             if (k == PD_EOF || k == PD_USER_BREAK || k == PD_ERROR) {
                 return k;
             }
@@ -143,39 +148,42 @@ public class WavePulseDecoder implements PulseDecoder {
 
     @Override
     public int waitForRisingEdge() {
-        return waitForSpecificEdge(true,false);
+        return waitForSpecificEdge(true, false);
     }
-    
-     @Override
+
+    @Override
     public int countUntilRisingEdge() {
-       return waitForSpecificEdge(true,true);
+        return waitForSpecificEdge(true, true);
     }
-    
+
     @Override
-     public int waitForFallingEdge() {
-       return waitForSpecificEdge(false,false);
+    public int waitForFallingEdge() {
+        return waitForSpecificEdge(false, false);
     }
+
     @Override
-     public int countUntilFallingEdge() {
-        return waitForSpecificEdge(false,true);
+    public int countUntilFallingEdge() {
+        return waitForSpecificEdge(false, true);
     }
-     
-    private int waitForSpecificEdge(boolean rising,boolean count) {
-        lastValue=-1;
+
+    private int waitForSpecificEdge(boolean rising, boolean count) {
+        lastValue = -1;
         int k;
-        final int edgeBefore = rising?0:1;
-        final int edgeAfter = rising?1:0;
-        
+        final int edgeBefore = rising ? 0 : 1;
+        final int edgeAfter = rising ? 1 : 0;
+
         while (true) {
             k = getNextSample();
 
             if (k == PD_EOF || k == PD_USER_BREAK || k == PD_ERROR) {
                 return k;
             }
-            
-            if (count==true) {
+
+            if (count == true) {
                 counter++;
-                if (counter>maxSilence) return PD_TOO_LONG;
+                if (counter > maxSilence) {
+                    return PD_TOO_LONG;
+                }
             }
 
             if (lastValue == edgeBefore && k == edgeAfter) {
@@ -186,7 +194,6 @@ public class WavePulseDecoder implements PulseDecoder {
             lastValue = k;
         }
     }
-
 
     @Override
     public int measurePulse() {
@@ -213,8 +220,6 @@ public class WavePulseDecoder implements PulseDecoder {
         }
 
     }
-
-   
 
     @Override
     public int getCounter() {
@@ -265,7 +270,7 @@ public class WavePulseDecoder implements PulseDecoder {
     private int getNextSample() {
 
         if (getStopRequest() == true) {
-            synchronized(this) {
+            synchronized (this) {
                 stopRequest = false;
             }
             return PD_USER_BREAK;
@@ -309,19 +314,22 @@ public class WavePulseDecoder implements PulseDecoder {
         } else {
             frame = (currentByte[byteIndex] & 0xFF) | ((currentByte[byteIndex + 1]) << 8);
         }
-        
-        if (useDCBlocker==true) {
-            int tempFrame=frame-xm1 + (int)Math.round(TIME_CONSTANT * ym1);
-            xm1=frame;
-            ym1=tempFrame;
-            frame=tempFrame;
+
+        if (useDCBlocker == true) {
+            int tempFrame = frame - xm1 + (int) Math.round(TIME_CONSTANT * ym1);
+            xm1 = frame;
+            ym1 = tempFrame;
+            frame = tempFrame;
         }
-        
-        if (bytesPerSample==1) {
-            if (frame>=128) return 1; else return 0;
-        }
-        else {
-            return (frame<0)?0:1;
+
+        if (bytesPerSample == 1) {
+            if (frame >= 128) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return (frame < 0) ? 0 : 1;
         }
 
     }

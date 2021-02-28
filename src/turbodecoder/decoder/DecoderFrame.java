@@ -140,6 +140,8 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         pMonitorModeSettings = new javax.swing.JPanel();
         jcbMonitorSaveAllBytes = new javax.swing.JCheckBox();
         filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
+        pDSP = new javax.swing.JPanel();
+        jcbBlockDCOffset = new javax.swing.JCheckBox();
         jspOtherSettings = new javax.swing.JScrollPane();
         pOtherSettingsCover = new javax.swing.JPanel();
         filler4 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
@@ -595,6 +597,30 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         gridBagConstraints.weighty = 1.0;
         pGeneralSettingsCover.add(filler3, gridBagConstraints);
 
+        pDSP.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "DSP"));
+        pDSP.setLayout(new java.awt.GridBagLayout());
+
+        jcbBlockDCOffset.setSelected(true);
+        jcbBlockDCOffset.setText("Block DC offset");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        pDSP.add(jcbBlockDCOffset, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
+        pGeneralSettingsCover.add(pDSP, gridBagConstraints);
+        pDSP.getAccessibleContext().setAccessibleName("DSP");
+
         jspGeneralSettings.setViewportView(pGeneralSettingsCover);
 
         jTabbedPane1.addTab("General settings", jspGeneralSettings);
@@ -789,10 +815,11 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
 
                 /*Initialize decoder*/
                 decoder = audioDecoder;
-                decoder.init(channel, this, jcoSampleRate.getSelectedItem(), jcoBitsPerSample.getSelectedItem());
+                decoder.init("", Integer.parseInt((String)jcoSampleRate.getSelectedItem()),jcoSourceChannel.getSelectedIndex(),Integer.parseInt((String)jcoBitsPerSample.getSelectedItem()),false,this);
+                
             } /*Wave file decoder*/ else {
                 decoder = waveDecoder;
-                decoder.init(jtfWaveFile.getText().trim(), this, channel, null);
+                decoder.init(jtfWaveFile.getText().trim(), 0,jcoSourceChannel.getSelectedIndex(),0,false,this);
             }
         } /*Failure - close and issue message*/ catch (Exception e) {
             try {
@@ -997,6 +1024,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.JButton jbtDetach;
     private javax.swing.JButton jbtJump;
     private javax.swing.JButton jbtStop;
+    private javax.swing.JCheckBox jcbBlockDCOffset;
     private javax.swing.JCheckBox jcbCsTurboAlwaysSaveAsBinaryFile;
     private javax.swing.JCheckBox jcbCsTurboSaveHeaderToExtraFile;
     private javax.swing.JComboBox<String> jcbFontSize;
@@ -1040,6 +1068,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.JPanel pASTSettings;
     private javax.swing.JPanel pAttachDetach;
     private javax.swing.JPanel pControls;
+    private javax.swing.JPanel pDSP;
     private javax.swing.JPanel pDeco;
     private javax.swing.JPanel pDecoding;
     private javax.swing.JPanel pFiles;
@@ -1204,6 +1233,10 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     void flushMonitorModeConfig(DecoderConfig d) {
         d.monitorSaveAllBytes = jcbMonitorSaveAllBytes.isSelected();
     }
+    
+    void flushDSPCofig(DecoderConfig d) {
+        d.dspBlockDCOffset=jcbBlockDCOffset.isSelected();
+    }
 
     void flushTurbo2000AndSuperTurboConfig(DecoderConfig d) {
         d.csTurboSaveHeaderToExtraFile = jcbCsTurboSaveHeaderToExtraFile.isSelected();
@@ -1235,6 +1268,10 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     void suckMonitorModeConfig(DecoderConfig d) {
         jcbMonitorSaveAllBytes.setSelected(d.monitorSaveAllBytes);
     }
+    
+    private void suckDSPConfig(DecoderConfig d) {
+        jcbBlockDCOffset.setSelected(d.dspBlockDCOffset);
+    }
 
     void suckTurbo2000AndSuperTurboConfig(DecoderConfig d) {
         jcbCsTurboSaveHeaderToExtraFile.setSelected(d.csTurboSaveHeaderToExtraFile);
@@ -1262,6 +1299,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     void flushAll(DecoderConfig d) {
         flushGenConfig(d);
         flushMonitorModeConfig(d);
+        flushDSPCofig(d);
         flushTurbo2000AndSuperTurboConfig(d);
         flushTurboROMConfig(d);
         flushLowerSilesiaTurbo2000Config(d);
@@ -1272,6 +1310,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     void suckAll(DecoderConfig d) {
         suckGenConfig(d);
         suckMonitorModeConfig(d);
+        suckDSPConfig(d);
         suckTurbo2000AndSuperTurboConfig(d);
         suckTurboROMConfig(d);
         suckLowerSilesiaTurbo2000Config(d);
@@ -1353,6 +1392,8 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         }
 
     }
+
+   
     
     private static class PersistentData implements Serializable {
         Rectangle frameBounds;

@@ -7,24 +7,9 @@ import javax.sound.sampled.TargetDataLine;
 
 /**
  *
- * @author  
+ * @author
  */
 public class AudioPulseDecoder implements PulseDecoder {
-
-    /**
-     *
-     */
-    public static final int CHANNEL_MONO = 0;
-
-    /**
-     *
-     */
-    public static final int CHANNEL_LEFT = 1;
-
-    /**
-     *
-     */
-    public static final int CHANNEL_RIGHT = 2;
 
     private TargetDataLine waveLine;
     private long sample;
@@ -44,8 +29,12 @@ public class AudioPulseDecoder implements PulseDecoder {
     private int bufferPosition;
     private int bufferedCount;
 
-
     private int sampleRate;
+
+    private int xm1;
+    private int ym1;
+    private static final double TIME_CONSTANT = 0.995;
+    private boolean useDCBlocker;
 
     /**
      *
@@ -67,10 +56,10 @@ public class AudioPulseDecoder implements PulseDecoder {
     }
 
     @Override
-    public void init(String config, DecoderLog log, Object config2, Object config3) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean dcBlocker, DecoderLog log) throws Exception {
 
         /*Handle mono/stereo etc*/
-        setupSampleGetterReader(config, (String) config2, (String) config3);
+        setupSampleGetterReader(channel, bitsPerSample, samplingRate);
 
         AudioFormat af = new AudioFormat(sampleRate, numBits, numChannels, numBits == 16, false);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, af);
@@ -82,6 +71,11 @@ public class AudioPulseDecoder implements PulseDecoder {
         buffer = new byte[waveLine.getBufferSize()];
         bufferPosition = 0;
         bufferedCount = 0;
+
+        xm1 = 0;
+        ym1 = 0;
+        useDCBlocker = dcBlocker;
+
         log.addMessage(new DecoderMessage("AudioPulseDecoder", Integer.toString(numBytes) + "/" + Integer.toString(byteIndex) + ":" + Integer.toString(sampleRate), DecoderMessage.SEV_DETAIL), false);
         log.addMessage(new DecoderMessage("AudioPulseDecoder", waveLine.getLineInfo().toString(), DecoderMessage.SEV_DETAIL), false);
     }
@@ -152,42 +146,43 @@ public class AudioPulseDecoder implements PulseDecoder {
 
     @Override
     public int waitForRisingEdge() {
-        return waitForSpecificEdge(true,false);
+        return waitForSpecificEdge(true, false);
     }
-    
-     @Override
+
+    @Override
     public int countUntilRisingEdge() {
-       return waitForSpecificEdge(true,true);
+        return waitForSpecificEdge(true, true);
     }
-    
+
     @Override
-     public int waitForFallingEdge() {
-       return waitForSpecificEdge(false,false);
+    public int waitForFallingEdge() {
+        return waitForSpecificEdge(false, false);
     }
+
     @Override
-     public int countUntilFallingEdge() {
-        return waitForSpecificEdge(false,true);
+    public int countUntilFallingEdge() {
+        return waitForSpecificEdge(false, true);
     }
-    
-    private int waitForSpecificEdge(boolean rising,boolean count) {
-        
-        lastValue=-1;
+
+    private int waitForSpecificEdge(boolean rising, boolean count) {
+
+        lastValue = -1;
         int k;
-        final int edgeBefore = rising?0:1;
-        final int edgeAfter = rising?1:0;
-        
+        final int edgeBefore = rising ? 0 : 1;
+        final int edgeAfter = rising ? 1 : 0;
+
         while (true) {
             k = getNextSample();
 
             if (k == PD_EOF || k == PD_USER_BREAK || k == PD_ERROR) {
-                lastValue=k;
+                lastValue = k;
                 return k;
             }
-            
-            if (count==true) {
+
+            if (count == true) {
                 counter++;
-                if (counter>maxSilence) {
-                    lastValue=k;
+                if (counter > maxSilence) {
+                    lastValue = k;
                     return PD_TOO_LONG;
                 }
             }
@@ -256,7 +251,7 @@ public class AudioPulseDecoder implements PulseDecoder {
     private int getNextSample() {
 
         if (getStopRequest() == true) {
-            synchronized(this) {
+            synchronized (this) {
                 stopRequest = false;
             }
             return PD_USER_BREAK;
@@ -284,20 +279,28 @@ public class AudioPulseDecoder implements PulseDecoder {
         }
 
         sample++;
+
+        int frame;
+
         if (numBits == 8) {
-            k = (currentByte[byteIndex] < 0 ? currentByte[byteIndex] + 256 : currentByte[byteIndex]);
-            if (k >= 128) {
-                return 1;
-            }
-            if (k >= 0) {
-                return 0;
-            }
+            frame = (currentByte[byteIndex] < 0 ? currentByte[byteIndex] + 256 : currentByte[byteIndex]);
         } else {
-            int frame = (currentByte[byteIndex] & 0xFF) | ((currentByte[byteIndex + 1]) << 8);
+            frame = (currentByte[byteIndex] & 0xFF) | ((currentByte[byteIndex + 1]) << 8);
+        }
+
+        if (useDCBlocker == true) {
+            int tempFrame = frame - xm1 + (int) Math.round(TIME_CONSTANT * ym1);
+            xm1 = frame;
+            ym1 = tempFrame;
+            frame = tempFrame;
+        }
+
+        if (numBits == 8) {
+            return (frame >= 128) ? 1 : 0;
+        } else {
             return (frame < 0) ? 0 : 1;
         }
 
-        return PD_EOF;
     }
 
     /**
@@ -327,24 +330,24 @@ public class AudioPulseDecoder implements PulseDecoder {
         }
     }
 
-    private void setupSampleGetterReader(String config, String config2, String config3) {
+    private void setupSampleGetterReader(int channel, int bitsPerSample, int samplingRate) {
 
         /*Mono/Stereo*/
-        if (config.equals("Mono")) {
+        if (channel == PulseDecoder.CHANNEL_MONO) {
             numBytes = 1;
             byteIndex = 0;
             numChannels = 1;
         } /*Left/Right*/ else {
             numBytes = 2;
             numChannels = 2;
-            if (config.equals("Left")) {
+            if (channel == PulseDecoder.CHANNEL_LEFT) {
                 byteIndex = 0;
             } else {
                 byteIndex = 1;
             }
         }
 
-        if (config3.equals("16")) {
+        if (bitsPerSample == 16) {
             numBytes *= 2;
             byteIndex *= 2;
             numBits = 16;
@@ -352,12 +355,7 @@ public class AudioPulseDecoder implements PulseDecoder {
             numBits = 8;
         }
 
-        try {
-            sampleRate = Integer.parseInt(config2);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            sampleRate = 44_100;
-        }
+        sampleRate = samplingRate;
 
     }
 

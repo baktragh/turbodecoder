@@ -44,12 +44,17 @@ public interface PulseDecoder {
      *
      */
     public static final int PD_OK = 0;
+    
+    
+    public static final int CHANNEL_MONO=0;
+    public static final int CHANNEL_LEFT=1;
+    public static final int CHANNEL_RIGHT=2;
 
     /**
      * Initialize pulse decoder
      * @throws java.lang.Exception
      */
-    public void init(String config, DecoderLog log, Object config2, Object config3) throws Exception;
+    public void init(String fspec,int samplingRate, int channel, int bitsPerSample,boolean dcBlocker,DecoderLog log) throws Exception;
 
     /**
      * Close pulse decoder

@@ -89,6 +89,8 @@ public class DecoderConfig implements Serializable {
     /**
      *
      */
+    
+    public boolean dspBlockDCOffset;
 
     public boolean csTurboSaveHeaderToExtraFile;
 
@@ -163,6 +165,10 @@ public class DecoderConfig implements Serializable {
     public void monitorDefaults() {
         monitorSaveAllBytes = false;
     }
+    
+    public void dspDefaults() {
+        dspBlockDCOffset=true;
+    }
 
     /**
      *
@@ -174,9 +180,10 @@ public class DecoderConfig implements Serializable {
         genVerboseMessages = true;
     }
 
-    void setAllDefaults() {
+    private void setAllDefaults() {
         generalDefaults();
         monitorDefaults();
+        dspDefaults();
         csTurboDefaults();
         turboROMDefaults();
         lowerSilesianTurbo2000Defaults();
