@@ -34,16 +34,16 @@ public class DecoderMessage {
     private final int severity;
     private final String messageText;
 
-    DecoderMessage(String prefix, String message, int severity) {
+    public DecoderMessage(String prefix, String message, int severity) {
         messageText = "[" + prefix + "] " + message;
         this.severity = severity;
     }
 
-    int getSeverity() {
+    public int getSeverity() {
         return severity;
     }
 
-    String getMessage() {
+    public String getMessage() {
         return messageText;
     }
 

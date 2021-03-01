@@ -1,6 +1,6 @@
 package turbodecoder.decoder;
 
-interface DecoderLog {
+public interface DecoderLog {
 
     public void addMessage(DecoderMessage msg, boolean fromExternalThread);
 

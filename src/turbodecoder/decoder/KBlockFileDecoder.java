@@ -1,5 +1,6 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.WavePulseDecoder;
 import java.io.*;
 import turbodecoder.TurboDecoder;
 import turbodecoder.Utils;

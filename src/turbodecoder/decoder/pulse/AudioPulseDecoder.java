@@ -1,9 +1,13 @@
-package turbodecoder.decoder;
+package turbodecoder.decoder.pulse;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
+import turbodecoder.decoder.DecoderLog;
+import turbodecoder.decoder.DecoderMessage;
+import turbodecoder.decoder.PulseDecoder;
+import turbodecoder.decoder.dsp.DCBlocker;
 
 /**
  *
@@ -31,10 +35,9 @@ public class AudioPulseDecoder implements PulseDecoder {
 
     private int sampleRate;
 
-    private int xm1;
-    private int ym1;
     private static final double TIME_CONSTANT = 0.995;
     private boolean useDCBlocker;
+    private DCBlocker dcBlocker;
 
     /**
      *
@@ -53,10 +56,12 @@ public class AudioPulseDecoder implements PulseDecoder {
         bufferPosition = 0;
         numBits = 8;
         numChannels = 1;
+        
+        dcBlocker = new DCBlocker(TIME_CONSTANT);
     }
 
     @Override
-    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean dcBlocker, DecoderLog log) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker, DecoderLog log) throws Exception {
 
         /*Handle mono/stereo etc*/
         setupSampleGetterReader(channel, bitsPerSample, samplingRate);
@@ -72,11 +77,16 @@ public class AudioPulseDecoder implements PulseDecoder {
         bufferPosition = 0;
         bufferedCount = 0;
 
-        xm1 = 0;
-        ym1 = 0;
-        useDCBlocker = dcBlocker;
+        this.useDCBlocker = useDCBlocker;
+        dcBlocker.reset();
+        
+        /*Display information on the decoder*/
+        StringBuilder dspList = new StringBuilder();
+        if (useDCBlocker) dspList.append("DC Blocker,");
+        
+        String infoString = String.format("FrameSize: %d, ByteIndex: %d, SamplingRate: %d, DSP:%s",numBytes,byteIndex,sampleRate,dspList.toString());
 
-        log.addMessage(new DecoderMessage("AudioPulseDecoder", Integer.toString(numBytes) + "/" + Integer.toString(byteIndex) + ":" + Integer.toString(sampleRate), DecoderMessage.SEV_DETAIL), false);
+        log.addMessage(new DecoderMessage("AudioPulseDecoder", infoString, DecoderMessage.SEV_DETAIL), false);
         log.addMessage(new DecoderMessage("AudioPulseDecoder", waveLine.getLineInfo().toString(), DecoderMessage.SEV_DETAIL), false);
     }
 
@@ -289,10 +299,7 @@ public class AudioPulseDecoder implements PulseDecoder {
         }
 
         if (useDCBlocker == true) {
-            int tempFrame = frame - xm1 + (int) Math.round(TIME_CONSTANT * ym1);
-            xm1 = frame;
-            ym1 = tempFrame;
-            frame = tempFrame;
+            frame = dcBlocker.getOutputValue(frame);
         }
 
         if (numBits == 8) {

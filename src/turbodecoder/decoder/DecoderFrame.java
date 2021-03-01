@@ -1,5 +1,7 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.WavePulseDecoder;
+import turbodecoder.decoder.pulse.AudioPulseDecoder;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -815,11 +817,11 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
 
                 /*Initialize decoder*/
                 decoder = audioDecoder;
-                decoder.init("", Integer.parseInt((String)jcoSampleRate.getSelectedItem()),jcoSourceChannel.getSelectedIndex(),Integer.parseInt((String)jcoBitsPerSample.getSelectedItem()),false,this);
+                decoder.init("", Integer.parseInt((String)jcoSampleRate.getSelectedItem()),jcoSourceChannel.getSelectedIndex(),Integer.parseInt((String)jcoBitsPerSample.getSelectedItem()),jcbBlockDCOffset.isSelected(),this);
                 
             } /*Wave file decoder*/ else {
                 decoder = waveDecoder;
-                decoder.init(jtfWaveFile.getText().trim(), 0,jcoSourceChannel.getSelectedIndex(),0,false,this);
+                decoder.init(jtfWaveFile.getText().trim(), 0,jcoSourceChannel.getSelectedIndex(),0,jcbBlockDCOffset.isSelected(),this);
             }
         } /*Failure - close and issue message*/ catch (Exception e) {
             try {

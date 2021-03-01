@@ -1,7 +1,11 @@
-package turbodecoder.decoder;
+package turbodecoder.decoder.pulse;
 
 import java.io.*;
 import turbodecoder.FileFormatException;
+import turbodecoder.decoder.DecoderLog;
+import turbodecoder.decoder.DecoderMessage;
+import turbodecoder.decoder.PulseDecoder;
+import turbodecoder.decoder.dsp.DCBlocker;
 
 /**
  *
@@ -31,10 +35,9 @@ public class WavePulseDecoder implements PulseDecoder {
     private long totalSamples;
     private boolean pastEOF;
 
-    private int xm1;
-    private int ym1;
     private static final double TIME_CONSTANT = 0.995;
     private boolean useDCBlocker;
+    private final DCBlocker dcBlocker;
 
     /**
      *
@@ -48,10 +51,11 @@ public class WavePulseDecoder implements PulseDecoder {
         currentByte = new byte[4];
         pastEOF = false;
         useDCBlocker = false;
+        dcBlocker = new DCBlocker(TIME_CONSTANT);
     }
 
     @Override
-    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean dcBlocker, DecoderLog log) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker, DecoderLog log) throws Exception {
 
         /*Open and examine file*/
         waveFile = new RandomAccessFile(fspec, "r");
@@ -70,18 +74,25 @@ public class WavePulseDecoder implements PulseDecoder {
         }
 
         rewind();
-        log.addMessage(new DecoderMessage("WavePulseDecoder",
-                String.format("%s FrameSize: %02d, ByteIndex: %d, SamplingRate: %d",
-                        fspec, frameSize, byteIndex, sampleRate),
-                DecoderMessage.SEV_DETAIL), false);
         
+        /*Initialize buffering*/
         buffer = new byte[BUF_SIZE];
         bufAvail = 0;
         bufPointer = 0;
-
-        xm1 = 0;
-        ym1 = 0;
-        useDCBlocker = dcBlocker;
+        
+        /*Initialize DSPs*/
+        this.useDCBlocker = useDCBlocker;
+        dcBlocker.reset();
+        
+        StringBuilder dspList = new StringBuilder();
+        if (useDCBlocker) dspList.append("DC Blocker,");
+        
+        log.addMessage(new DecoderMessage("WavePulseDecoder",
+                String.format("%s FrameSize: %02d, ByteIndex: %d, SamplingRate: %d, DSP: %s",
+                        fspec, frameSize, byteIndex, sampleRate,dspList.toString()),
+                DecoderMessage.SEV_DETAIL), false);
+        
+        
 
     }
 
@@ -316,10 +327,7 @@ public class WavePulseDecoder implements PulseDecoder {
         }
 
         if (useDCBlocker == true) {
-            int tempFrame = frame - xm1 + (int) Math.round(TIME_CONSTANT * ym1);
-            xm1 = frame;
-            ym1 = tempFrame;
-            frame = tempFrame;
+            frame = dcBlocker.getOutputValue(frame);
         }
 
         if (bytesPerSample == 1) {
