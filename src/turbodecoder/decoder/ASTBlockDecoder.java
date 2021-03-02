@@ -1,5 +1,6 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
 import turbodecoder.decoder.pulse.WavePulseDecoder;
 import turbodecoder.Utils;
 

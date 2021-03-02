@@ -1,5 +1,6 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
 import java.io.IOException;
 import turbodecoder.Utils;
 import turbodecoder.dtb.DOS2Binary;

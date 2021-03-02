@@ -1,5 +1,6 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;

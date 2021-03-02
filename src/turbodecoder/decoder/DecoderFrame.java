@@ -1,5 +1,6 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
 import turbodecoder.decoder.pulse.WavePulseDecoder;
 import turbodecoder.decoder.pulse.AudioPulseDecoder;
 import java.awt.Color;
@@ -144,6 +145,8 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
         pDSP = new javax.swing.JPanel();
         jcbBlockDCOffset = new javax.swing.JCheckBox();
+        jspSchmitt = new javax.swing.JSpinner();
+        jLabel3 = new javax.swing.JLabel();
         jspOtherSettings = new javax.swing.JScrollPane();
         pOtherSettingsCover = new javax.swing.JPanel();
         filler4 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 32767));
@@ -609,9 +612,25 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
         pDSP.add(jcbBlockDCOffset, gridBagConstraints);
+
+        jspSchmitt.setModel(new javax.swing.SpinnerNumberModel(0, 0, 16383, 1));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        pDSP.add(jspSchmitt, gridBagConstraints);
+
+        jLabel3.setText("Schmitt trigger hysteresis:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+        pDSP.add(jLabel3, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -621,7 +640,6 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(4, 0, 0, 0);
         pGeneralSettingsCover.add(pDSP, gridBagConstraints);
-        pDSP.getAccessibleContext().setAccessibleName("DSP");
 
         jspGeneralSettings.setViewportView(pGeneralSettingsCover);
 
@@ -817,11 +835,11 @@ public class DecoderFrame extends javax.swing.JFrame implements DecoderLog, UIPe
 
                 /*Initialize decoder*/
                 decoder = audioDecoder;
-                decoder.init("", Integer.parseInt((String)jcoSampleRate.getSelectedItem()),jcoSourceChannel.getSelectedIndex(),Integer.parseInt((String)jcoBitsPerSample.getSelectedItem()),jcbBlockDCOffset.isSelected(),this);
+                decoder.init("", Integer.parseInt((String)jcoSampleRate.getSelectedItem()),jcoSourceChannel.getSelectedIndex(),Integer.parseInt((String)jcoBitsPerSample.getSelectedItem()),jcbBlockDCOffset.isSelected(),(Integer)jspSchmitt.getValue(),this);
                 
             } /*Wave file decoder*/ else {
                 decoder = waveDecoder;
-                decoder.init(jtfWaveFile.getText().trim(), 0,jcoSourceChannel.getSelectedIndex(),0,jcbBlockDCOffset.isSelected(),this);
+                decoder.init(jtfWaveFile.getText().trim(), 0,jcoSourceChannel.getSelectedIndex(),0,jcbBlockDCOffset.isSelected(),(Integer)jspSchmitt.getValue(),this);
             }
         } /*Failure - close and issue message*/ catch (Exception e) {
             try {
@@ -1012,6 +1030,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.Box.Filler filler4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1064,6 +1083,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     private javax.swing.JSlider jslNavigation;
     private javax.swing.JScrollPane jspGeneralSettings;
     private javax.swing.JScrollPane jspOtherSettings;
+    private javax.swing.JSpinner jspSchmitt;
     private javax.swing.JTextField jtfOutDir;
     private javax.swing.JTextField jtfSample;
     private javax.swing.JTextField jtfWaveFile;

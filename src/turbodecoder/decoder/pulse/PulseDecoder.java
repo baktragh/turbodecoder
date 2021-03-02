@@ -1,4 +1,6 @@
-package turbodecoder.decoder;
+package turbodecoder.decoder.pulse;
+
+import turbodecoder.decoder.DecoderLog;
 
 /**
  * Pulse decoder
@@ -54,7 +56,7 @@ public interface PulseDecoder {
      * Initialize pulse decoder
      * @throws java.lang.Exception
      */
-    public void init(String fspec,int samplingRate, int channel, int bitsPerSample,boolean dcBlocker,DecoderLog log) throws Exception;
+    public void init(String fspec,int samplingRate, int channel, int bitsPerSample,boolean dcBlocker,int tolerance,DecoderLog log) throws Exception;
 
     /**
      * Close pulse decoder

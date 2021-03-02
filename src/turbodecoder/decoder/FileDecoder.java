@@ -1,5 +1,7 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
+
 interface FileDecoder {
 
     public static final int CS_TURBO_2000 = 0;

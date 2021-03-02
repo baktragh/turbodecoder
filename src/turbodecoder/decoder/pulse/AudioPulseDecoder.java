@@ -6,7 +6,6 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 import turbodecoder.decoder.DecoderLog;
 import turbodecoder.decoder.DecoderMessage;
-import turbodecoder.decoder.PulseDecoder;
 import turbodecoder.decoder.dsp.DCBlocker;
 
 /**
@@ -61,7 +60,7 @@ public class AudioPulseDecoder implements PulseDecoder {
     }
 
     @Override
-    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker, DecoderLog log) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker, int tolerance, DecoderLog log) throws Exception {
 
         /*Handle mono/stereo etc*/
         setupSampleGetterReader(channel, bitsPerSample, samplingRate);

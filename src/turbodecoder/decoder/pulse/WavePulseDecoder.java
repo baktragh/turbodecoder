@@ -4,8 +4,8 @@ import java.io.*;
 import turbodecoder.FileFormatException;
 import turbodecoder.decoder.DecoderLog;
 import turbodecoder.decoder.DecoderMessage;
-import turbodecoder.decoder.PulseDecoder;
 import turbodecoder.decoder.dsp.DCBlocker;
+import turbodecoder.decoder.dsp.Schmitt;
 
 /**
  *
@@ -35,9 +35,15 @@ public class WavePulseDecoder implements PulseDecoder {
     private long totalSamples;
     private boolean pastEOF;
 
+    /*DSP DC blocker*/
     private static final double TIME_CONSTANT = 0.995;
     private boolean useDCBlocker;
     private final DCBlocker dcBlocker;
+    
+    /*DSP Schmitt Trigger*/
+    private int schmittTolerance;
+    private final Schmitt schmitt;
+    
 
     /**
      *
@@ -52,10 +58,12 @@ public class WavePulseDecoder implements PulseDecoder {
         pastEOF = false;
         useDCBlocker = false;
         dcBlocker = new DCBlocker(TIME_CONSTANT);
+        schmittTolerance=0;
+        schmitt=new Schmitt();
     }
 
     @Override
-    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker, DecoderLog log) throws Exception {
+    public void init(String fspec, int samplingRate, int channel, int bitsPerSample, boolean useDCBlocker,int tolerance,DecoderLog log) throws Exception {
 
         /*Open and examine file*/
         waveFile = new RandomAccessFile(fspec, "r");
@@ -81,11 +89,27 @@ public class WavePulseDecoder implements PulseDecoder {
         bufPointer = 0;
         
         /*Initialize DSPs*/
+        
+        /*DC Blocker*/
         this.useDCBlocker = useDCBlocker;
         dcBlocker.reset();
         
+        /*Schmitt trigger*/
+        this.schmittTolerance=tolerance;
+        /*Do not allow tolerance to be more than 50%*/
+        if (bytesPerSample==1) {
+            if (schmittTolerance>127) schmittTolerance =127;
+        }
+        else {
+            if (schmittTolerance>16383) schmittTolerance=16383;
+        }
+        this.schmitt.init(schmittTolerance, bytesPerSample==1 ? 128 : 0);
+        
+        /*Report on DSPs and their settings*/
         StringBuilder dspList = new StringBuilder();
-        if (useDCBlocker) dspList.append("DC Blocker,");
+        if (useDCBlocker) dspList.append("DC Blocker, ");
+        if (schmittTolerance>0) dspList.append(String.format("Schmitt: %d ",schmittTolerance));
+        
         
         log.addMessage(new DecoderMessage("WavePulseDecoder",
                 String.format("%s FrameSize: %02d, ByteIndex: %d, SamplingRate: %d, DSP: %s",
@@ -328,6 +352,16 @@ public class WavePulseDecoder implements PulseDecoder {
 
         if (useDCBlocker == true) {
             frame = dcBlocker.getOutputValue(frame);
+        }
+        
+        if (schmittTolerance>0) {
+            boolean b = schmitt.getOutput(frame);
+            if (bytesPerSample==1) {
+                frame = b?255:0;
+            }
+            else {
+                frame = b?32767:-32768;
+            }
         }
 
         if (bytesPerSample == 1) {

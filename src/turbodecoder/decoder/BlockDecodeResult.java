@@ -1,5 +1,7 @@
 package turbodecoder.decoder;
 
+import turbodecoder.decoder.pulse.PulseDecoder;
+
 /**
  * A crate that encapsulates results of turbo block decoding
  */
