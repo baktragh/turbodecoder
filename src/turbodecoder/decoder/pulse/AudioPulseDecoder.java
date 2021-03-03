@@ -7,6 +7,7 @@ import javax.sound.sampled.TargetDataLine;
 import turbodecoder.decoder.DecoderLog;
 import turbodecoder.decoder.DecoderMessage;
 import turbodecoder.decoder.dsp.DCBlocker;
+import turbodecoder.decoder.dsp.Schmitt;
 
 /**
  *
@@ -36,7 +37,11 @@ public class AudioPulseDecoder implements PulseDecoder {
 
     private static final double TIME_CONSTANT = 0.995;
     private boolean useDCBlocker;
-    private DCBlocker dcBlocker;
+    private final DCBlocker dcBlocker;
+    
+     /*DSP Schmitt Trigger*/
+    private int schmittTolerance;
+    private final Schmitt schmitt;
 
     /**
      *
@@ -57,6 +62,8 @@ public class AudioPulseDecoder implements PulseDecoder {
         numChannels = 1;
         
         dcBlocker = new DCBlocker(TIME_CONSTANT);
+        schmittTolerance=0;
+        schmitt=new Schmitt();
     }
 
     @Override
@@ -79,9 +86,22 @@ public class AudioPulseDecoder implements PulseDecoder {
         this.useDCBlocker = useDCBlocker;
         dcBlocker.reset();
         
+        /*Schmitt trigger*/
+        this.schmittTolerance=tolerance;
+        /*Do not allow tolerance to be more than 50%*/
+        if (numBits==8) {
+            if (schmittTolerance>127) schmittTolerance =127;
+        }
+        else {
+            if (schmittTolerance>16383) schmittTolerance=16383;
+        }
+        this.schmitt.init(schmittTolerance, numBits==8 ? 128 : 0);
+        
+        
         /*Display information on the decoder*/
         StringBuilder dspList = new StringBuilder();
-        if (useDCBlocker) dspList.append("DC Blocker,");
+        if (useDCBlocker) dspList.append("DC Blocker, ");
+        if (schmittTolerance>0) dspList.append(String.format("Schmitt: %d ",schmittTolerance));
         
         String infoString = String.format("FrameSize: %d, ByteIndex: %d, SamplingRate: %d, DSP:%s",numBytes,byteIndex,sampleRate,dspList.toString());
 
@@ -299,6 +319,16 @@ public class AudioPulseDecoder implements PulseDecoder {
 
         if (useDCBlocker == true) {
             frame = dcBlocker.getOutputValue(frame);
+        }
+        
+        if (schmittTolerance>0) {
+            boolean b = schmitt.getOutput(frame);
+            if (numBits==8) {
+                frame = b?255:0;
+            }
+            else {
+                frame = b?32767:-32768;
+            }
         }
 
         if (numBits == 8) {
