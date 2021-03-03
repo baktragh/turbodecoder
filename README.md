@@ -13,4 +13,4 @@ Java Runtime Environment (JRE) or Java Development Kit (JDK) 8 or newer.
 * Sound card
 
 # Supported DSP effects
-* DC blocker
+* DC blocker, Schmitt Trigger with adjustable hysteresis

@@ -4,7 +4,7 @@
 \begin_header
 \save_transient_properties true
 \origin unavailable
-\textclass article
+\textclass paper
 \begin_preamble
 \date{}
 \usepackage{footnote}
@@ -20,7 +20,7 @@
 \font_sans "default" "default"
 \font_typewriter "default" "default"
 \font_math "auto" "auto"
-\font_default_family default
+\font_default_family sfdefault
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
@@ -33,10 +33,10 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\paperfontsize default
+\paperfontsize 12
 \spacing single
 \use_hyperref true
-\pdf_title "TURGEN SYSTEM"
+\pdf_title "Turbo Decoder"
 \pdf_bookmarks true
 \pdf_bookmarksnumbered true
 \pdf_bookmarksopen true
@@ -99,6 +99,10 @@
 
 \begin_layout Title
 Turbo Decoder
+\begin_inset Newline newline
+\end_inset
+
+tool for decoding files from 8-bit Atari turbo cassette tapes
 \end_layout
 
 \begin_layout Section
@@ -222,49 +226,6 @@ Turbo decoder
 \end_layout
 
 \begin_layout Subsection
-Preparing WAVE files
-\end_layout
-
-\begin_layout Standard
-To prepare the wave file, you can use Audacity - free, open source, cross-platfo
-rm software for recording and editing sounds.
-\end_layout
-
-\begin_layout Standard
-Before decoding, applying of the following two filters is recommended: 
-\end_layout
-
-\begin_layout Enumerate
-High pass filter.
- Cutoff frequency 1000 Hz, rolloff 48 dB.
- This helps to remove DC offset.
-\end_layout
-
-\begin_layout Enumerate
-Low pass filter.
- Cutoff frequency 12000 Hz, rolloff 48 dB.
- This removes small fluctuations of the signal.
-\end_layout
-
-\begin_layout Standard
-Alternatively, you can use the Bass & Treble filter set to minimum bass
- and maximum treble.
-\end_layout
-
-\begin_layout Standard
-To use a wave file with the A8CAS-enhanced atari800 emulator, amplify the
- signal with maximum amplification and allow clipping.
-\end_layout
-
-\begin_layout Standard
-When using a software for editing sounds, 
-\emph on
-ensure that the resulting wave file is saved without any metadata
-\emph default
- (Artist name, track name...).
-\end_layout
-
-\begin_layout Subsection
 Preparing the Decoder
 \end_layout
 
@@ -278,7 +239,7 @@ Signal source
 \end_layout
 
 \begin_layout Standard
-If the source of the electric signal is a WAVE file, fill-in the WAVE file
+If the source of the electric signal is a WAVE file, enter the WAVE file
  name and select input channel using the 
 \emph on
 Channel
@@ -420,13 +381,66 @@ This option is available for special purposes such as decoding data stored
  in non-standard formats, recovering corrupted files etc.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Configuring the Decoder
 \end_layout
 
 \begin_layout Standard
-Use controls on the General settings and Other settings tabs to configure
- the decoder.
+Use controls on the 
+\emph on
+General settings
+\emph default
+ and 
+\emph on
+Other settings
+\emph default
+ tabs to configure the decoder.
+\end_layout
+
+\begin_layout Subsection
+Configuring DSP Filters
+\end_layout
+
+\begin_layout Standard
+Turbo decoder features two DSP filters to improve its decoding capabilities.
+\end_layout
+
+\begin_layout Subsubsection*
+DC Blocker.
+\end_layout
+
+\begin_layout Standard
+This filter blocks the DC offset like a capacitor by applying a simple online
+ algorithm.
+ You can enable or disable the DC blocker.
+\end_layout
+
+\begin_layout Subsubsection*
+
+\series bold
+Schmitt Trigger.
+\end_layout
+
+\begin_layout Standard
+The Schmitt Trigger is used to convert analog signal to digital.
+ You can set the hysteresis to a desired level (in sample values).
+ Maximum hysteresis is half of sample value range (127 for 8-bit samples,
+ 16383 for 16-bit samples).
+ Setting the hysteresis to zero disables the Schmitt Trigger (and the decoder
+ then just works as a plain comparator).
+\end_layout
+
+\begin_layout Standard
+Increasing the hysteresis can sometimes help to decode poor quality signal.
+ For such signal, the recommended value is 
+\series bold
+2000
+\series default
+ for 16-bit samples and 
+\series bold
+6
+\series default
+ for 8-bit samples.
 \end_layout
 
 \end_body
