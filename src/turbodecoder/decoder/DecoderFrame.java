@@ -1258,6 +1258,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     
     void flushDSPCofig(DecoderConfig d) {
         d.dspBlockDCOffset=jcbBlockDCOffset.isSelected();
+        d.dspSchmittHysteresis=(Integer)jspSchmitt.getValue();
     }
 
     void flushTurbo2000AndSuperTurboConfig(DecoderConfig d) {
@@ -1293,6 +1294,7 @@ private void jtfSampleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
     
     private void suckDSPConfig(DecoderConfig d) {
         jcbBlockDCOffset.setSelected(d.dspBlockDCOffset);
+        jspSchmitt.setValue(d.dspSchmittHysteresis);
     }
 
     void suckTurbo2000AndSuperTurboConfig(DecoderConfig d) {

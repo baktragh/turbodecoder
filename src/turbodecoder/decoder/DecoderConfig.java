@@ -91,6 +91,7 @@ public class DecoderConfig implements Serializable {
      */
     
     public boolean dspBlockDCOffset;
+    public int dspSchmittHysteresis;
 
     public boolean csTurboSaveHeaderToExtraFile;
 
@@ -168,6 +169,7 @@ public class DecoderConfig implements Serializable {
     
     public void dspDefaults() {
         dspBlockDCOffset=true;
+        dspSchmittHysteresis=0;
     }
 
     /**
