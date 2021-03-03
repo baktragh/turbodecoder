@@ -3,7 +3,7 @@
 #To be executed with MSYS2
 
 #Basic configuration
-VER_COMP=1.0.0
+VER_COMP=1.0.1
 SRC_DIR=$1
 DEST_BIN=$1/releases/turbodecoder-${VER_COMP}-bin
 DEST_PARENT=$1/releases
