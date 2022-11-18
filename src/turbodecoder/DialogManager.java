@@ -19,6 +19,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import turbodecoder.decoder.DecoderFrame;
+import com.formdev.flatlaf.FlatLightLaf;
 
 /**
  * Centralized Frame and Dialog handling
@@ -58,9 +59,19 @@ public class DialogManager {
     private final HashMap<String,Object> uiPersistenceMap;
 
     private DialogManager() {
-        /*Look and feel*/
         uiPersistenceMap = new HashMap<>();
-        tryWindowsLookAndFeel();
+        
+        /*Setup FlatLaf*/
+        try {
+            final String FLATLAF_LIGHT_CLASS_NAME = "com.formdev.flatlaf.FlatLightLaf";
+            FlatLightLaf.installLafInfo("FlatLaF Light", com.formdev.flatlaf.FlatLightLaf.class);
+            UIManager.setLookAndFeel(FLATLAF_LIGHT_CLASS_NAME);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+         
+        
     }
 
 
